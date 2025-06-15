@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
@@ -30,6 +30,8 @@ import {
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { createPortal } from 'react-dom';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { NotificationSettings, NotificationSettingsActions } from '@/components/notifications/notification-settings';
 
 interface Notification {
   id: string;
@@ -127,6 +129,9 @@ export function NotificationCenter() {
   const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
   const [filter, setFilter] = useState<'all' | 'unread' | 'signal' | 'alert' | 'trade' | 'system' | 'security' | 'market'>('all');
   const [isOpen, setIsOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settings, setSettings] = useState(null);
+  const resetToDefaultsRef = useRef<() => void>();
 
   // Simulate real-time notifications
   useEffect(() => {
@@ -215,6 +220,12 @@ export function NotificationCenter() {
     if (filterType === 'all') return notifications.length;
     if (filterType === 'unread') return unreadCount;
     return notifications.filter(n => n.type === filterType).length;
+  };
+
+  const handleResetToDefaults = () => {
+    if (resetToDefaultsRef.current) {
+      resetToDefaultsRef.current();
+    }
   };
 
   return (
@@ -421,7 +432,7 @@ export function NotificationCenter() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => console.log('Open notification settings')}
+                        onClick={() => setSettingsOpen(true)}
                         className="text-xs h-7"
                       >
                         <Settings className="w-3 h-3 mr-1" />
@@ -436,6 +447,21 @@ export function NotificationCenter() {
         </AnimatePresence>,
         document.body
       )}
+
+      {/* Notification Settings Drawer */}
+      <Sheet open={settingsOpen} onOpenChange={setSettingsOpen}>
+        <SheetContent side="right" className="max-w-md w-full flex flex-col p-0">
+          <SheetHeader className="p-6 pb-0">
+            <SheetTitle>Notification Settings</SheetTitle>
+          </SheetHeader>
+          <div className="flex-1 overflow-y-auto px-6 pt-4 pb-2">
+            <NotificationSettings showActions={false} onClose={() => setSettingsOpen(false)} resetToDefaultsRef={fn => (resetToDefaultsRef.current = fn)} />
+          </div>
+          <div className="sticky bottom-0 left-0 w-full bg-card/95 border-t border-border/50 p-4 z-10 flex justify-between">
+            <NotificationSettingsActions onClose={() => setSettingsOpen(false)} resetToDefaults={handleResetToDefaults} />
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

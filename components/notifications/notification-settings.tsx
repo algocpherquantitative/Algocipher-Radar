@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -23,49 +23,59 @@ import {
 
 interface NotificationSettingsProps {
   onClose?: () => void;
+  showActions?: boolean;
+  resetToDefaultsRef?: (fn: () => void) => void;
 }
 
-export function NotificationSettings({ onClose }: NotificationSettingsProps) {
-  const [settings, setSettings] = useState({
-    // General Settings
-    enabled: true,
-    sound: true,
-    vibration: true,
-    volume: 50,
-    
-    // Notification Types
-    signals: true,
-    alerts: true,
-    trades: true,
-    system: false,
-    security: true,
-    market: true,
-    
-    // Priority Filters
-    critical: true,
-    high: true,
-    medium: true,
-    low: false,
-    
-    // Delivery Methods
-    browser: true,
-    email: true,
-    telegram: false,
-    webhook: false,
-    
-    // Timing
-    quietHours: false,
-    quietStart: '22:00',
-    quietEnd: '08:00',
-    
-    // Advanced
-    groupSimilar: true,
-    maxPerHour: 10,
-    autoMarkRead: false
-  });
+export function NotificationSettings({ onClose, showActions = true, resetToDefaultsRef }: NotificationSettingsProps) {
+  const SETTINGS_KEY = 'notification-settings';
+
+  const getInitialSettings = () => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(SETTINGS_KEY);
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch {}
+      }
+    }
+    return {
+      enabled: true,
+      sound: true,
+      vibration: true,
+      volume: 50,
+      signals: true,
+      alerts: true,
+      trades: true,
+      system: false,
+      security: true,
+      market: true,
+      critical: true,
+      high: true,
+      medium: true,
+      low: false,
+      browser: true,
+      email: true,
+      telegram: false,
+      webhook: false,
+      quietHours: false,
+      quietStart: '22:00',
+      quietEnd: '08:00',
+      groupSimilar: true,
+      maxPerHour: 10,
+      autoMarkRead: false
+    };
+  };
+
+  const [settings, setSettings] = useState(getInitialSettings);
+
+  // Save settings to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  }, [settings]);
 
   const updateSetting = (key: string, value: any) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
+    setSettings((prev: typeof settings) => ({ ...prev, [key]: value }));
   };
 
   const resetToDefaults = () => {
@@ -96,6 +106,12 @@ export function NotificationSettings({ onClose }: NotificationSettingsProps) {
       autoMarkRead: false
     });
   };
+
+  useEffect(() => {
+    if (resetToDefaultsRef) {
+      resetToDefaultsRef(resetToDefaults);
+    }
+  }, [resetToDefaultsRef]);
 
   return (
     <div className="space-y-6">
@@ -394,21 +410,23 @@ export function NotificationSettings({ onClose }: NotificationSettingsProps) {
         </CardContent>
       </Card>
 
-      {/* Action Buttons */}
-      <div className="flex justify-between">
-        <Button variant="outline" onClick={resetToDefaults}>
-          Reset to Defaults
-        </Button>
-        <div className="space-x-2">
-          {onClose && (
-            <Button variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-          )}
-          <Button>
-            Save Settings
+      {showActions && <NotificationSettingsActions onClose={onClose} resetToDefaults={resetToDefaults} />}
+    </div>
+  );
+}
+
+export function NotificationSettingsActions({ onClose, resetToDefaults }: { onClose?: () => void; resetToDefaults?: () => void }) {
+  return (
+    <div className="flex justify-between">
+      <Button variant="outline" onClick={resetToDefaults}>
+        Reset to Defaults
+      </Button>
+      <div className="space-x-2">
+        {onClose && (
+          <Button variant="outline" onClick={onClose}>
+            Cancel
           </Button>
-        </div>
+        )}
       </div>
     </div>
   );
