@@ -1,0 +1,296 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 26, 26, 26;
+  --background-end-rgb: 33, 33, 33;
+  
+  /* Trading specific colors */
+  --bullish: 34, 197, 94;
+  --bearish: 239, 68, 68;
+  --neutral: 59, 130, 246;
+  --warning: 245, 158, 11;
+  --success: 16, 185, 129;
+  --danger: 220, 38, 127;
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 10%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 16%;
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 16%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 142 76% 36%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 0 0% 85%;
+    --muted: 0 0% 14%;
+    --muted-foreground: 0 0% 55%;
+    --accent: 0 0% 20%;
+    --accent-foreground: 0 0% 85%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 20%;
+    --input: 0 0% 14%;
+    --ring: 142 76% 36%;
+    --chart-1: 142 76% 36%;
+    --chart-2: 346 87% 43%;
+    --chart-3: 262 83% 58%;
+    --chart-4: 43 96% 56%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.5rem;
+  }
+
+  .light {
+    --background: 0 0% 98%;
+    --foreground: 0 0% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+    --primary: 142 76% 36%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 20%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 20%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 90%;
+    --input: 0 0% 96%;
+    --ring: 142 76% 36%;
+    --chart-1: 142 76% 36%;
+    --chart-2: 346 87% 43%;
+    --chart-3: 262 83% 58%;
+    --chart-4: 43 96% 56%;
+    --chart-5: 27 87% 67%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground min-h-screen;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 13px;
+  }
+}
+
+@layer components {
+  .signal-card {
+    @apply bg-card/90 backdrop-blur-sm border border-border/60 rounded-md p-2.5 
+           transition-all duration-200 hover:bg-card hover:border-border/80 
+           hover:shadow-sm cursor-move;
+  }
+  
+  .signal-card.bullish {
+    @apply border-l-2 border-l-green-600/60 hover:border-l-green-500;
+  }
+  
+  .signal-card.bearish {
+    @apply border-l-2 border-l-red-600/60 hover:border-l-red-500;
+  }
+  
+  .signal-card.neutral {
+    @apply border-l-2 border-l-blue-600/60 hover:border-l-blue-500;
+  }
+  
+  .glassmorphism {
+    @apply bg-card/80 backdrop-blur-sm border border-border/50 rounded-lg;
+  }
+  
+  .terminal-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-2;
+  }
+  
+  .metric-card {
+    @apply glassmorphism p-3 text-center transition-all duration-200 hover:bg-card/90;
+  }
+
+  .sidebar-nav {
+    @apply flex items-center space-x-2 px-3 py-2 text-sm rounded-md transition-colors
+           hover:bg-accent hover:text-accent-foreground cursor-pointer;
+  }
+
+  .sidebar-nav.active {
+    @apply bg-accent text-accent-foreground;
+  }
+
+  /* Light mode specific adjustments */
+  .light .signal-card {
+    @apply bg-card/95 border-border/80 hover:bg-card hover:border-border shadow-sm;
+  }
+
+  .light .glassmorphism {
+    @apply bg-card/95 border-border/80 shadow-sm;
+  }
+
+  .light .metric-card {
+    @apply bg-card/95 border-border/80 shadow-sm hover:bg-card;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary to-green-400 bg-clip-text text-transparent;
+  }
+  
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  /* Light mode color adjustments using CSS custom properties */
+  .light {
+    --green-text: 22 163 74; /* green-600 */
+    --red-text: 220 38 38; /* red-600 */
+    --blue-text: 37 99 235; /* blue-600 */
+    --yellow-text: 202 138 4; /* yellow-600 */
+    --purple-text: 147 51 234; /* purple-600 */
+  }
+
+  .light .text-green-400 {
+    color: rgb(var(--green-text));
+  }
+
+  .light .text-red-400 {
+    color: rgb(var(--red-text));
+  }
+
+  .light .text-blue-400 {
+    color: rgb(var(--blue-text));
+  }
+
+  .light .text-yellow-400 {
+    color: rgb(var(--yellow-text));
+  }
+
+  .light .text-purple-400 {
+    color: rgb(var(--purple-text));
+  }
+
+  .light .border-green-400\/30 {
+    border-color: rgb(var(--green-text) / 0.4);
+  }
+
+  .light .border-red-400\/30 {
+    border-color: rgb(var(--red-text) / 0.4);
+  }
+
+  .light .border-blue-400\/30 {
+    border-color: rgb(var(--blue-text) / 0.4);
+  }
+
+  .light .border-yellow-400\/30 {
+    border-color: rgb(var(--yellow-text) / 0.4);
+  }
+
+  .light .border-purple-400\/30 {
+    border-color: rgb(var(--purple-text) / 0.4);
+  }
+
+  .light .bg-green-500\/10 {
+    background-color: rgb(var(--green-text) / 0.15);
+  }
+
+  .light .bg-red-500\/10 {
+    background-color: rgb(var(--red-text) / 0.15);
+  }
+
+  .light .bg-yellow-500\/10 {
+    background-color: rgb(var(--yellow-text) / 0.15);
+  }
+
+  .light .bg-blue-500\/10 {
+    background-color: rgb(var(--blue-text) / 0.15);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+}
+
+.price-up {
+  @apply text-green-600 animate-pulse;
+}
+
+.price-down {
+  @apply text-red-600 animate-pulse;
+}
+
+.light .price-up {
+  color: rgb(21 128 61); /* green-700 */
+}
+
+.light .price-down {
+  color: rgb(185 28 28); /* red-700 */
+}
+
+.signal-indicator {
+  @apply inline-block w-1.5 h-1.5 rounded-full mr-1.5 animate-pulse;
+}
+
+.signal-indicator.bullish {
+  @apply bg-green-500;
+}
+
+.signal-indicator.bearish {
+  @apply bg-red-500;
+}
+
+.signal-indicator.neutral {
+  @apply bg-blue-500;
+}
+
+.light .signal-indicator.bullish {
+  background-color: rgb(22 163 74); /* green-600 */
+}
+
+.light .signal-indicator.bearish {
+  background-color: rgb(220 38 38); /* red-600 */
+}
+
+.light .signal-indicator.neutral {
+  background-color: rgb(37 99 235); /* blue-600 */
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}
+
+/* Compact text sizes */
+.text-micro {
+  font-size: 10px;
+  line-height: 12px;
+}
+
+.text-tiny {
+  font-size: 11px;
+  line-height: 14px;
+}
