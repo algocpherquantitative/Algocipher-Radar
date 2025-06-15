@@ -20,7 +20,8 @@ export default function DashboardPage() {
   const [selectedSignal, setSelectedSignal] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isLoading, setIsLoading] = useState(true);
-  const { theme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  const { theme, resolvedTheme } = useTheme();
   const router = useRouter();
 
   // Mock recent signals for command palette
@@ -31,6 +32,7 @@ export default function DashboardPage() {
   ];
 
   useEffect(() => {
+    setMounted(true);
     // Check authentication
     const checkAuth = () => {
       const token = localStorage.getItem('auth-token');
@@ -128,7 +130,7 @@ export default function DashboardPage() {
             className="space-y-3"
           >
             <div className="relative w-64 h-16 mx-auto">
-              {theme === 'dark' ? (
+              {mounted && resolvedTheme === 'dark' ? (
                 <Image
                   src="/Light with wordmark.svg"
                   alt="Algocipher Radar"
