@@ -17,16 +17,29 @@ import { DetectedSignal } from '@/lib/signal-types';
 
 interface SignalFeedProps {
   onSignalSelect: (signalId: string) => void;
+  hideFilters?: boolean;
+  searchTerm: string;
+  marketFilter: string;
+  confidenceFilter: string;
+  directionFilter: string;
+  timeframeFilter: string;
+  categoryFilter: string;
+  signals?: DetectedSignal[];
 }
 
-export function SignalFeed({ onSignalSelect }: SignalFeedProps) {
+export function SignalFeed({
+  onSignalSelect,
+  hideFilters = false,
+  searchTerm,
+  marketFilter,
+  confidenceFilter,
+  directionFilter,
+  timeframeFilter,
+  categoryFilter,
+  signals: externalSignals
+}: SignalFeedProps) {
   const [signals, setSignals] = useState<DetectedSignal[]>(generateMockSignals());
   const [filteredSignals, setFilteredSignals] = useState(signals);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [marketFilter, setMarketFilter] = useState('all');
-  const [confidenceFilter, setConfidenceFilter] = useState('all');
-  const [categoryFilter, setCategoryFilter] = useState('all');
-  const [directionFilter, setDirectionFilter] = useState('all');
   const [selectedSignalId, setSelectedSignalId] = useState<string | null>(null);
 
   const sensors = useSensors(
@@ -37,6 +50,10 @@ export function SignalFeed({ onSignalSelect }: SignalFeedProps) {
   );
 
   useEffect(() => {
+    if (externalSignals) {
+      setFilteredSignals(externalSignals);
+      return;
+    }
     // Simulate real-time signal updates
     const interval = setInterval(() => {
       setSignals(prev => {
@@ -110,8 +127,12 @@ export function SignalFeed({ onSignalSelect }: SignalFeedProps) {
       filtered = filtered.filter(signal => signal.direction === directionFilter);
     }
 
+    if (timeframeFilter !== 'all') {
+      filtered = filtered.filter(signal => signal.timeframe === timeframeFilter);
+    }
+
     setFilteredSignals(filtered);
-  }, [signals, searchTerm, marketFilter, confidenceFilter, categoryFilter, directionFilter]);
+  }, [signals, searchTerm, marketFilter, confidenceFilter, categoryFilter, directionFilter, timeframeFilter]);
 
   function handleDragEnd(event: any) {
     const { active, over } = event;
@@ -143,118 +164,31 @@ export function SignalFeed({ onSignalSelect }: SignalFeedProps) {
   const avgConfidence = filteredSignals.length > 0 ? 
     Math.round(filteredSignals.reduce((sum, s) => sum + s.confidence, 0) / filteredSignals.length) : 0;
 
+  // If externalSignals is provided, use it directly for rendering and skip all internal filtering logic
+  const signalsToRender = externalSignals ? externalSignals : filteredSignals;
+
   return (
     <div className="flex flex-col h-full space-y-4">
       {/* Signal Stats Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <Badge variant="outline" className="text-green-400 border-green-400/30">
-            <TrendingUp className="w-3 h-3 mr-1" />
-            {filteredSignals.length} Signals
-          </Badge>
-          <Badge variant="outline" className="text-blue-400 border-blue-400/30">
-            {avgConfidence}% Avg Confidence
-          </Badge>
-          <Badge variant="outline" className="text-yellow-400 border-yellow-400/30">
-            {highConfidenceSignals.length} High Confidence
-          </Badge>
+      {!externalSignals && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <Badge variant="outline" className="text-green-400 border-green-400/30">
+              <TrendingUp className="w-3 h-3 mr-1" />
+              {filteredSignals.length} Signals
+            </Badge>
+            <Badge variant="outline" className="text-blue-400 border-blue-400/30">
+              {avgConfidence}% Avg Confidence
+            </Badge>
+            <Badge variant="outline" className="text-yellow-400 border-yellow-400/30">
+              {highConfidenceSignals.length} High Confidence
+            </Badge>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Enhanced Filters */}
-      <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid w-full grid-cols-6 h-8">
-          <TabsTrigger value="all" className="text-micro" onClick={() => setCategoryFilter('all')}>
-            All ({filteredSignals.length})
-          </TabsTrigger>
-          <TabsTrigger value="price_action" className="text-micro" onClick={() => setCategoryFilter('price_action')}>
-            <Zap className="w-3 h-3 mr-1" />
-            PA ({categoryStats.price_action})
-          </TabsTrigger>
-          <TabsTrigger value="candlestick" className="text-micro" onClick={() => setCategoryFilter('candlestick')}>
-            <BarChart3 className="w-3 h-3 mr-1" />
-            CS ({categoryStats.candlestick})
-          </TabsTrigger>
-          <TabsTrigger value="chart_pattern" className="text-micro" onClick={() => setCategoryFilter('chart_pattern')}>
-            <Activity className="w-3 h-3 mr-1" />
-            CP ({categoryStats.chart_pattern})
-          </TabsTrigger>
-          <TabsTrigger value="indicator" className="text-micro" onClick={() => setCategoryFilter('indicator')}>
-            <BarChart3 className="w-3 h-3 mr-1" />
-            IND ({categoryStats.indicator})
-          </TabsTrigger>
-          <TabsTrigger value="support_resistance" className="text-micro" onClick={() => setCategoryFilter('support_resistance')}>
-            <Target className="w-3 h-3 mr-1" />
-            S/R ({categoryStats.support_resistance})
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
-
-      <div className="space-y-3">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-          <Input
-            placeholder="Search signals..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 bg-muted/50 border-border/50 h-8 text-sm"
-          />
-        </div>
-        
-        <div className="grid grid-cols-4 gap-2">
-          <Select value={marketFilter} onValueChange={setMarketFilter}>
-            <SelectTrigger className="bg-muted/50 border-border/50 h-8 text-sm">
-              <SelectValue placeholder="Market" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Markets</SelectItem>
-              <SelectItem value="forex">Forex</SelectItem>
-              <SelectItem value="crypto">Crypto</SelectItem>
-              <SelectItem value="stocks">Stocks</SelectItem>
-              <SelectItem value="indices">Indices</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <Select value={confidenceFilter} onValueChange={setConfidenceFilter}>
-            <SelectTrigger className="bg-muted/50 border-border/50 h-8 text-sm">
-              <SelectValue placeholder="Confidence" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Levels</SelectItem>
-              <SelectItem value="high">High (80%+)</SelectItem>
-              <SelectItem value="medium">Medium (65-79%)</SelectItem>
-              <SelectItem value="low">Low (&lt;65%)</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select value={directionFilter} onValueChange={setDirectionFilter}>
-            <SelectTrigger className="bg-muted/50 border-border/50 h-8 text-sm">
-              <SelectValue placeholder="Direction" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Directions</SelectItem>
-              <SelectItem value="bullish">Bullish</SelectItem>
-              <SelectItem value="bearish">Bearish</SelectItem>
-              <SelectItem value="neutral">Neutral</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => {
-              setSearchTerm('');
-              setMarketFilter('all');
-              setConfidenceFilter('all');
-              setCategoryFilter('all');
-              setDirectionFilter('all');
-            }}
-            className="h-8 text-sm"
-          >
-            Clear
-          </Button>
-        </div>
-      </div>
+      {/* Filter controls are now only rendered in the filter column. */}
 
       {/* Enhanced Signal Cards */}
       <ScrollArea className="flex-1">
@@ -263,10 +197,10 @@ export function SignalFeed({ onSignalSelect }: SignalFeedProps) {
           collisionDetection={closestCenter}
           onDragEnd={handleDragEnd}
         >
-          <SortableContext items={filteredSignals.map(s => s.id)} strategy={verticalListSortingStrategy}>
+          <SortableContext items={signalsToRender.map(s => s.id)} strategy={verticalListSortingStrategy}>
             <div className="space-y-3 pr-2">
               <AnimatePresence>
-                {filteredSignals.map((signal, index) => (
+                {signalsToRender.map((signal, index) => (
                   <motion.div
                     key={signal.id}
                     initial={{ opacity: 0, y: 20 }}
@@ -282,8 +216,7 @@ export function SignalFeed({ onSignalSelect }: SignalFeedProps) {
                   </motion.div>
                 ))}
               </AnimatePresence>
-              
-              {filteredSignals.length === 0 && (
+              {signalsToRender.length === 0 && (
                 <div className="text-center py-8">
                   <div className="w-16 h-16 bg-muted/20 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Filter className="w-8 h-8 text-muted-foreground" />

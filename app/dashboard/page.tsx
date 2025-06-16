@@ -15,14 +15,29 @@ import { TrendingUp, Zap, Activity, Sparkles } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { CollapsibleFilterColumn } from '@/components/signals/collapsible-filter-column';
+import { generateMockSignals } from '@/lib/mock-data';
+import { Badge } from '@/components/ui/badge';
 
 export default function DashboardPage() {
   const [selectedSignal, setSelectedSignal] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isLoading, setIsLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const [isFilterCollapsed, setIsFilterCollapsed] = useState(false);
   const { theme, resolvedTheme } = useTheme();
   const router = useRouter();
+
+  // Filter state (lifted up)
+  const [searchTerm, setSearchTerm] = useState('');
+  const [marketFilter, setMarketFilter] = useState('all');
+  const [confidenceFilter, setConfidenceFilter] = useState('all');
+  const [directionFilter, setDirectionFilter] = useState('all');
+  const [timeframeFilter, setTimeframeFilter] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+
+  // Signals state for the signals tab
+  const [signals, setSignals] = useState(generateMockSignals());
 
   // Mock recent signals for command palette
   const recentSignals = [
@@ -50,6 +65,74 @@ export default function DashboardPage() {
 
     checkAuth();
   }, [router]);
+
+  useEffect(() => {
+    // Simulate real-time signal updates (copy from SignalFeed)
+    const interval = setInterval(() => {
+      setSignals(prev => {
+        const newSignals = [...prev];
+        // Randomly update some signals
+        const randomIndex = Math.floor(Math.random() * newSignals.length);
+        if (newSignals[randomIndex]) {
+          newSignals[randomIndex] = {
+            ...newSignals[randomIndex],
+            confidence: Math.max(60, Math.min(95, newSignals[randomIndex].confidence + (Math.random() - 0.5) * 10)),
+            timestamp: Date.now() - Math.random() * 60000,
+          };
+        }
+        // Occasionally add new signals
+        if (Math.random() < 0.3) {
+          const newSignal = generateMockSignals(1)[0];
+          newSignals.unshift(newSignal);
+          return newSignals.slice(0, 25); // Keep only latest 25
+        }
+        return newSignals;
+      });
+    }, 8000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Filtering logic for signals tab
+  const filteredSignals = signals.filter(signal => {
+    if (searchTerm && !(
+      signal.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      signal.pattern.toLowerCase().includes(searchTerm.toLowerCase())
+    )) return false;
+    if (marketFilter !== 'all' && signal.market !== marketFilter) return false;
+    if (confidenceFilter !== 'all') {
+      const minConfidence = confidenceFilter === 'high' ? 80 : confidenceFilter === 'medium' ? 65 : 0;
+      const maxConfidence = confidenceFilter === 'high' ? 100 : confidenceFilter === 'medium' ? 79 : 64;
+      if (signal.confidence < minConfidence || signal.confidence > maxConfidence) return false;
+    }
+    if (categoryFilter !== 'all') {
+      const pattern = signal.patternId || '';
+      switch (categoryFilter) {
+        case 'price_action':
+          if (!(pattern.includes('breakout') || pattern.includes('support') || pattern.includes('gap'))) return false;
+          break;
+        case 'candlestick':
+          if (!(pattern.includes('engulfing') || pattern.includes('hammer') || pattern.includes('star'))) return false;
+          break;
+        case 'chart_pattern':
+          if (!(pattern.includes('head') || pattern.includes('double') || pattern.includes('triangle') || pattern.includes('flag'))) return false;
+          break;
+        case 'indicator':
+          if (!(pattern.includes('rsi') || pattern.includes('macd') || pattern.includes('cross') || pattern.includes('vwap'))) return false;
+          break;
+        case 'support_resistance':
+          if (!(pattern.includes('fib') || pattern.includes('retest') || pattern.includes('psychological'))) return false;
+          break;
+        default:
+          break;
+      }
+    }
+    if (directionFilter !== 'all' && signal.direction !== directionFilter) return false;
+    if (timeframeFilter !== 'all' && signal.timeframe !== timeframeFilter) return false;
+    return true;
+  });
+
+  const avgConfidence = filteredSignals.length > 0 ? Math.round(filteredSignals.reduce((sum, s) => sum + s.confidence, 0) / filteredSignals.length) : 0;
+  const highConfidenceCount = filteredSignals.filter(s => s.confidence >= 80).length;
 
   const handleSignalAction = (action: string, signalId?: string) => {
     console.log(`Signal action: ${action}`, signalId);
@@ -91,6 +174,10 @@ export default function DashboardPage() {
         console.log('Clearing all filters');
         break;
     }
+  };
+
+  const handleFilterCollapse = (collapsed: boolean) => {
+    setIsFilterCollapsed(collapsed);
   };
 
   if (isLoading) {
@@ -166,16 +253,28 @@ export default function DashboardPage() {
             <div className="flex-shrink-0">
               <MarketOverview />
             </div>
-            
             {/* Main Trading Interface - Full Height */}
-            <div className="flex-1 min-h-0">
-              <ResizablePanelGroup
-                direction="horizontal"
-                className="h-full rounded-lg border border-border/50 bg-card/20 backdrop-blur-sm"
-              >
-                {/* Signals Panel - Wider for better visibility */}
-                <ResizablePanel defaultSize={45} minSize={35}>
-                  <div className="h-full p-4 flex flex-col">
+            <ResizablePanelGroup direction="horizontal" className="h-full rounded-lg border border-border/50 bg-card/20 backdrop-blur-sm">
+              {/* Filter and Signals Panel Group */}
+              <ResizablePanel defaultSize={isFilterCollapsed ? 8 : 50} minSize={8}>
+                <div className="h-full flex">
+                  <CollapsibleFilterColumn
+                    searchTerm={searchTerm}
+                    setSearchTerm={setSearchTerm}
+                    marketFilter={marketFilter}
+                    setMarketFilter={setMarketFilter}
+                    confidenceFilter={confidenceFilter}
+                    setConfidenceFilter={setConfidenceFilter}
+                    directionFilter={directionFilter}
+                    setDirectionFilter={setDirectionFilter}
+                    timeframeFilter={timeframeFilter}
+                    setTimeframeFilter={setTimeframeFilter}
+                    categoryFilter={categoryFilter}
+                    setCategoryFilter={setCategoryFilter}
+                    onCollapseChange={handleFilterCollapse}
+                  />
+                  {/* Signals Panel */}
+                  <div className="flex-1 h-full p-4 flex flex-col">
                     <div className="mb-3 flex-shrink-0">
                       <h2 className="text-lg font-semibold text-foreground flex items-center">
                         <Zap className="w-5 h-5 mr-2 text-primary" />
@@ -186,39 +285,108 @@ export default function DashboardPage() {
                       </p>
                     </div>
                     <div className="flex-1 min-h-0">
-                      <SignalFeed onSignalSelect={setSelectedSignal} />
+                      <SignalFeed
+                        onSignalSelect={setSelectedSignal}
+                        hideFilters
+                        searchTerm={searchTerm}
+                        marketFilter={marketFilter}
+                        confidenceFilter={confidenceFilter}
+                        directionFilter={directionFilter}
+                        timeframeFilter={timeframeFilter}
+                        categoryFilter={categoryFilter}
+                      />
                     </div>
                   </div>
-                </ResizablePanel>
-                
-                <ResizableHandle withHandle />
-                
-                {/* Chart Panel */}
-                <ResizablePanel defaultSize={55} minSize={40}>
-                  <div className="h-full p-4">
-                    <EnhancedTradingChart selectedSignal={selectedSignal} />
-                  </div>
-                </ResizablePanel>
-              </ResizablePanelGroup>
-            </div>
+                </div>
+              </ResizablePanel>
+              <ResizableHandle withHandle />
+              {/* Chart Panel */}
+              <ResizablePanel defaultSize={50} minSize={30}>
+                <div className="h-full p-4">
+                  <EnhancedTradingChart selectedSignal={selectedSignal} />
+                </div>
+              </ResizablePanel>
+            </ResizablePanelGroup>
           </div>
         );
       
       case 'signals':
         return (
-          <div className="h-full flex flex-col">
-            <div className="mb-4 flex-shrink-0">
-              <h1 className="text-2xl font-bold text-foreground flex items-center">
-                <Activity className="w-6 h-6 mr-2 text-primary" />
-                Trading Signals
-              </h1>
-              <p className="text-muted-foreground">
-                Real-time AI-powered pattern detection across global markets
-              </p>
+          <div className="h-full flex flex-col space-y-4">
+            {/* Header above the main container */}
+            <div className="px-6 pt-6 pb-2">
+              <div className="mb-1 flex items-center">
+                <Activity className="w-7 h-7 mr-2 text-primary" />
+                <h1 className="text-2xl font-bold text-foreground">Live Signals</h1>
+              </div>
+              <div className="text-muted-foreground text-lg mb-3">Real-time AI-powered pattern detection across global markets</div>
+              {/* Stats badges */}
+              <div className="flex items-center space-x-3">
+                <Badge variant="outline" className="text-green-400 border-green-400/30">
+                  <TrendingUp className="w-3 h-3 mr-1" />
+                  {filteredSignals.length} Signals
+                </Badge>
+                <Badge variant="outline" className={
+                  avgConfidence >= 80
+                    ? "text-green-400 border-green-400/30"
+                    : avgConfidence >= 65
+                    ? "text-yellow-400 border-yellow-400/30"
+                    : "text-red-400 border-red-400/30"
+                }>
+                  {Math.round(avgConfidence)}% Avg Confidence
+                </Badge>
+                <Badge variant="outline" className="text-yellow-400 border-yellow-400/30">
+                  {highConfidenceCount} High Confidence
+                </Badge>
+              </div>
             </div>
-            <div className="flex-1 min-h-0">
-              <SignalFeed onSignalSelect={setSelectedSignal} />
-            </div>
+            {/* Main Trading Interface - Full Height for Live Signals */}
+            <ResizablePanelGroup direction="horizontal" className="h-full rounded-lg border border-border/50 bg-card/20 backdrop-blur-sm">
+              {/* Filter and Signals Panel Group */}
+              <ResizablePanel defaultSize={isFilterCollapsed ? 8 : 50} minSize={8}>
+                <div className="h-full flex">
+                  <CollapsibleFilterColumn
+                    searchTerm={searchTerm}
+                    setSearchTerm={setSearchTerm}
+                    marketFilter={marketFilter}
+                    setMarketFilter={setMarketFilter}
+                    confidenceFilter={confidenceFilter}
+                    setConfidenceFilter={setConfidenceFilter}
+                    directionFilter={directionFilter}
+                    setDirectionFilter={setDirectionFilter}
+                    timeframeFilter={timeframeFilter}
+                    setTimeframeFilter={setTimeframeFilter}
+                    categoryFilter={categoryFilter}
+                    setCategoryFilter={setCategoryFilter}
+                    onCollapseChange={handleFilterCollapse}
+                  />
+                  {/* Signals Panel */}
+                  <div className="flex-1 h-full p-4 flex flex-col">
+                    {/* Remove the header from here */}
+                    <div className="flex-1 min-h-0">
+                      <SignalFeed
+                        onSignalSelect={setSelectedSignal}
+                        hideFilters
+                        searchTerm={searchTerm}
+                        marketFilter={marketFilter}
+                        confidenceFilter={confidenceFilter}
+                        directionFilter={directionFilter}
+                        timeframeFilter={timeframeFilter}
+                        categoryFilter={categoryFilter}
+                        signals={filteredSignals}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </ResizablePanel>
+              <ResizableHandle withHandle />
+              {/* Chart Panel */}
+              <ResizablePanel defaultSize={50} minSize={30}>
+                <div className="h-full p-4">
+                  <EnhancedTradingChart selectedSignal={selectedSignal} />
+                </div>
+              </ResizablePanel>
+            </ResizablePanelGroup>
           </div>
         );
       
