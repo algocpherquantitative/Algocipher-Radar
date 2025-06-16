@@ -40,30 +40,30 @@ export function NotificationSettings({ onClose, showActions = true, resetToDefau
       }
     }
     return {
-      enabled: true,
-      sound: true,
-      vibration: true,
-      volume: 50,
-      signals: true,
-      alerts: true,
-      trades: true,
-      system: false,
-      security: true,
-      market: true,
-      critical: true,
-      high: true,
-      medium: true,
-      low: false,
-      browser: true,
-      email: true,
-      telegram: false,
-      webhook: false,
-      quietHours: false,
-      quietStart: '22:00',
-      quietEnd: '08:00',
-      groupSimilar: true,
-      maxPerHour: 10,
-      autoMarkRead: false
+    enabled: true,
+    sound: true,
+    vibration: true,
+    volume: 50,
+    signals: true,
+    alerts: true,
+    trades: true,
+    system: false,
+    security: true,
+    market: true,
+    critical: true,
+    high: true,
+    medium: true,
+    low: false,
+    browser: true,
+    email: true,
+    telegram: false,
+    webhook: false,
+    quietHours: false,
+    quietStart: '22:00',
+    quietEnd: '08:00',
+    groupSimilar: true,
+    maxPerHour: 10,
+    autoMarkRead: false
     };
   };
 
@@ -417,16 +417,16 @@ export function NotificationSettings({ onClose, showActions = true, resetToDefau
 
 export function NotificationSettingsActions({ onClose, resetToDefaults }: { onClose?: () => void; resetToDefaults?: () => void }) {
   return (
-    <div className="flex justify-between">
-      <Button variant="outline" onClick={resetToDefaults}>
-        Reset to Defaults
-      </Button>
-      <div className="space-x-2">
-        {onClose && (
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-        )}
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={resetToDefaults}>
+          Reset to Defaults
+        </Button>
+        <div className="space-x-2">
+          {onClose && (
+            <Button variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+          )}
       </div>
     </div>
   );

@@ -102,26 +102,6 @@ export default function DashboardPage() {
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="text-center space-y-6"
         >
-          {/* Enhanced Logo with Animation */}
-          <motion.div
-            initial={{ rotate: 0 }}
-            animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            className="relative mx-auto w-20 h-20 flex items-center justify-center"
-          >
-            <div className="absolute inset-0 rounded-full border-4 border-primary/20" />
-            <div className="absolute inset-0 rounded-full border-4 border-transparent border-t-primary animate-spin" />
-            <div className="relative w-12 h-12">
-              <Image
-                src="/logo icon.svg"
-                alt="Algocipher Radar"
-                fill
-                className="object-contain"
-                priority
-              />
-            </div>
-          </motion.div>
-
           {/* Brand Text with Logo */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -159,7 +139,6 @@ export default function DashboardPage() {
             className="space-y-3"
           >
             <div className="flex items-center justify-center space-x-2 text-sm text-muted-foreground">
-              <Sparkles className="w-4 h-4 animate-pulse" />
               <span>Loading trading signals...</span>
             </div>
             

@@ -11,16 +11,20 @@ export default function HomePage() {
   useEffect(() => {
     // Check authentication status
     const checkAuth = () => {
-      const token = localStorage.getItem('auth-token');
-      const userData = localStorage.getItem('user-data');
-      
-      if (token && userData) {
-        setIsAuthenticated(true);
-        // Redirect to dashboard
-        router.replace('/dashboard');
-      } else {
+      try {
+        const token = localStorage.getItem('auth-token');
+        const userData = localStorage.getItem('user-data');
+        
+        if (token && userData) {
+          setIsAuthenticated(true);
+          router.replace('/dashboard');
+        } else {
+          setIsAuthenticated(false);
+          router.replace('/auth/signin');
+        }
+      } catch (error) {
+        console.error('Error checking authentication:', error);
         setIsAuthenticated(false);
-        // Redirect to sign in
         router.replace('/auth/signin');
       }
     };

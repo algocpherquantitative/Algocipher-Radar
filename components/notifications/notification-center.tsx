@@ -250,200 +250,200 @@ export function NotificationCenter() {
 
       {/* Notification Panel rendered in portal for highest z-index */}
       {typeof window !== 'undefined' && createPortal(
-        <AnimatePresence>
-          {isOpen && (
-            <>
-              {/* Backdrop */}
-              <div 
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            {/* Backdrop */}
+            <div 
                 className="fixed inset-0 z-[99998]" 
-                onClick={() => setIsOpen(false)}
-              />
-              {/* Notification Panel - Fixed z-index */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                transition={{ duration: 0.2 }}
+              onClick={() => setIsOpen(false)}
+            />
+            {/* Notification Panel - Fixed z-index */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: -10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: -10 }}
+              transition={{ duration: 0.2 }}
                 className="fixed right-6 top-16 z-[100000] w-96 max-h-[600px] bg-card/95 backdrop-blur-sm border border-border/50 rounded-lg shadow-2xl"
                 onMouseLeave={() => setIsOpen(false)}
-              >
-                {/* Header */}
-                <div className="p-4 border-b border-border/50">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-lg font-semibold text-foreground">Notifications</h3>
-                    <div className="flex items-center space-x-2">
-                      {unreadCount > 0 && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={markAllAsRead}
-                          className="text-xs h-6 px-2"
-                        >
-                          Mark all read
-                        </Button>
-                      )}
+            >
+              {/* Header */}
+              <div className="p-4 border-b border-border/50">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-lg font-semibold text-foreground">Notifications</h3>
+                  <div className="flex items-center space-x-2">
+                    {unreadCount > 0 && (
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => setIsOpen(false)}
-                        className="h-6 w-6 p-0"
+                        onClick={markAllAsRead}
+                        className="text-xs h-6 px-2"
                       >
-                        <X className="w-4 h-4" />
+                        Mark all read
                       </Button>
-                    </div>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setIsOpen(false)}
+                      className="h-6 w-6 p-0"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
                   </div>
-
-                  {/* Filter Tabs */}
-                  <Tabs value={filter} onValueChange={(value: any) => setFilter(value)}>
-                    <TabsList className="grid w-full grid-cols-4 h-8">
-                      <TabsTrigger value="all" className="text-xs">
-                        All ({getFilterCount('all')})
-                      </TabsTrigger>
-                      <TabsTrigger value="unread" className="text-xs">
-                        Unread ({getFilterCount('unread')})
-                      </TabsTrigger>
-                      <TabsTrigger value="signal" className="text-xs">
-                        Signals ({getFilterCount('signal')})
-                      </TabsTrigger>
-                      <TabsTrigger value="alert" className="text-xs">
-                        Alerts ({getFilterCount('alert')})
-                      </TabsTrigger>
-                    </TabsList>
-                  </Tabs>
                 </div>
 
-                {/* Notifications List */}
+                {/* Filter Tabs */}
+                <Tabs value={filter} onValueChange={(value: any) => setFilter(value)}>
+                  <TabsList className="grid w-full grid-cols-4 h-8">
+                    <TabsTrigger value="all" className="text-xs">
+                      All ({getFilterCount('all')})
+                    </TabsTrigger>
+                    <TabsTrigger value="unread" className="text-xs">
+                      Unread ({getFilterCount('unread')})
+                    </TabsTrigger>
+                    <TabsTrigger value="signal" className="text-xs">
+                      Signals ({getFilterCount('signal')})
+                    </TabsTrigger>
+                    <TabsTrigger value="alert" className="text-xs">
+                      Alerts ({getFilterCount('alert')})
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              </div>
+
+              {/* Notifications List */}
                 <ScrollArea className="h-96 overflow-y-auto">
-                  <div className="p-2">
-                    {filteredNotifications.length === 0 ? (
-                      <div className="text-center py-8">
-                        <Bell className="w-12 h-12 text-muted-foreground/50 mx-auto mb-3" />
-                        <p className="text-sm text-muted-foreground">No notifications</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        {filteredNotifications.map((notification, index) => (
-                          <motion.div
-                            key={notification.id}
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.05 }}
-                            className={`group relative p-3 rounded-lg border-l-4 transition-all duration-200 hover:bg-muted/30 cursor-pointer ${
-                              getPriorityColor(notification.priority)
-                            } ${!notification.read ? 'bg-muted/20' : 'bg-muted/10'}`}
-                            onClick={() => markAsRead(notification.id)}
-                          >
-                            <div className="flex items-start space-x-3">
-                              <div className="flex-shrink-0 mt-0.5">
-                                {getNotificationIcon(notification.type, notification.priority)}
-                              </div>
-                              
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-start justify-between">
-                                  <div className="flex-1">
-                                    <h4 className="text-sm font-medium text-foreground mb-1">
-                                      {notification.title}
-                                    </h4>
-                                    <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
-                                      {notification.message}
-                                    </p>
-                                    
-                                    <div className="flex items-center space-x-2">
-                                      <Badge variant="outline" className="text-xs h-4 px-1 capitalize">
-                                        {notification.type}
-                                      </Badge>
-                                      <Badge 
-                                        variant="outline" 
-                                        className={`text-xs h-4 px-1 ${
-                                          notification.priority === 'critical' ? 'text-red-500 border-red-500/30' :
-                                          notification.priority === 'high' ? 'text-orange-400 border-orange-400/30' :
-                                          notification.priority === 'medium' ? 'text-yellow-400 border-yellow-400/30' :
-                                          'text-blue-400 border-blue-400/30'
-                                        }`}
-                                      >
-                                        {notification.priority}
-                                      </Badge>
-                                      <span className="text-xs text-muted-foreground">
-                                        {formatDistanceToNow(notification.timestamp, { addSuffix: true })}
-                                      </span>
-                                    </div>
-                                  </div>
+                <div className="p-2">
+                  {filteredNotifications.length === 0 ? (
+                    <div className="text-center py-8">
+                      <Bell className="w-12 h-12 text-muted-foreground/50 mx-auto mb-3" />
+                      <p className="text-sm text-muted-foreground">No notifications</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {filteredNotifications.map((notification, index) => (
+                        <motion.div
+                          key={notification.id}
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                          className={`group relative p-3 rounded-lg border-l-4 transition-all duration-200 hover:bg-muted/30 cursor-pointer ${
+                            getPriorityColor(notification.priority)
+                          } ${!notification.read ? 'bg-muted/20' : 'bg-muted/10'}`}
+                          onClick={() => markAsRead(notification.id)}
+                        >
+                          <div className="flex items-start space-x-3">
+                            <div className="flex-shrink-0 mt-0.5">
+                              {getNotificationIcon(notification.type, notification.priority)}
+                            </div>
+                            
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <h4 className="text-sm font-medium text-foreground mb-1">
+                                    {notification.title}
+                                  </h4>
+                                  <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                                    {notification.message}
+                                  </p>
                                   
-                                  <div className="flex items-center space-x-1 ml-2">
-                                    {!notification.read && (
-                                      <div className="w-2 h-2 bg-primary rounded-full" />
-                                    )}
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        deleteNotification(notification.id);
-                                      }}
-                                      className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  <div className="flex items-center space-x-2">
+                                    <Badge variant="outline" className="text-xs h-4 px-1 capitalize">
+                                      {notification.type}
+                                    </Badge>
+                                    <Badge 
+                                      variant="outline" 
+                                      className={`text-xs h-4 px-1 ${
+                                        notification.priority === 'critical' ? 'text-red-500 border-red-500/30' :
+                                        notification.priority === 'high' ? 'text-orange-400 border-orange-400/30' :
+                                        notification.priority === 'medium' ? 'text-yellow-400 border-yellow-400/30' :
+                                        'text-blue-400 border-blue-400/30'
+                                      }`}
                                     >
-                                      <X className="w-3 h-3" />
-                                    </Button>
+                                      {notification.priority}
+                                    </Badge>
+                                    <span className="text-xs text-muted-foreground">
+                                      {formatDistanceToNow(notification.timestamp, { addSuffix: true })}
+                                    </span>
                                   </div>
                                 </div>
                                 
-                                {/* Action Buttons */}
-                                {notification.actions && notification.actions.length > 0 && (
-                                  <div className="flex space-x-2 mt-2">
-                                    {notification.actions.map((action) => (
-                                      <Button
-                                        key={action.id}
-                                        variant={action.type === 'primary' ? 'default' : 
-                                                action.type === 'danger' ? 'destructive' : 'outline'}
-                                        size="sm"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          executeAction(action, notification.id);
-                                        }}
-                                        className="h-6 text-xs px-2"
-                                      >
-                                        {action.label}
-                                      </Button>
-                                    ))}
-                                  </div>
-                                )}
+                                <div className="flex items-center space-x-1 ml-2">
+                                  {!notification.read && (
+                                    <div className="w-2 h-2 bg-primary rounded-full" />
+                                  )}
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      deleteNotification(notification.id);
+                                    }}
+                                    className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </Button>
+                                </div>
                               </div>
+                              
+                              {/* Action Buttons */}
+                              {notification.actions && notification.actions.length > 0 && (
+                                <div className="flex space-x-2 mt-2">
+                                  {notification.actions.map((action) => (
+                                    <Button
+                                      key={action.id}
+                                      variant={action.type === 'primary' ? 'default' : 
+                                              action.type === 'danger' ? 'destructive' : 'outline'}
+                                      size="sm"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        executeAction(action, notification.id);
+                                      }}
+                                      className="h-6 text-xs px-2"
+                                    >
+                                      {action.label}
+                                    </Button>
+                                  ))}
+                                </div>
+                              )}
                             </div>
-                          </motion.div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </ScrollArea>
-
-                {/* Footer */}
-                {notifications.length > 0 && (
-                  <div className="p-3 border-t border-border/50">
-                    <div className="flex justify-between">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={clearAll}
-                        className="text-xs h-7"
-                      >
-                        <Trash2 className="w-3 h-3 mr-1" />
-                        Clear All
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setSettingsOpen(true)}
-                        className="text-xs h-7"
-                      >
-                        <Settings className="w-3 h-3 mr-1" />
-                        Settings
-                      </Button>
+                          </div>
+                        </motion.div>
+                      ))}
                     </div>
+                  )}
+                </div>
+              </ScrollArea>
+
+              {/* Footer */}
+              {notifications.length > 0 && (
+                <div className="p-3 border-t border-border/50">
+                  <div className="flex justify-between">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={clearAll}
+                      className="text-xs h-7"
+                    >
+                      <Trash2 className="w-3 h-3 mr-1" />
+                      Clear All
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                        onClick={() => setSettingsOpen(true)}
+                      className="text-xs h-7"
+                    >
+                      <Settings className="w-3 h-3 mr-1" />
+                      Settings
+                    </Button>
                   </div>
-                )}
-              </motion.div>
-            </>
-          )}
+                </div>
+              )}
+            </motion.div>
+          </>
+        )}
         </AnimatePresence>,
         document.body
       )}
