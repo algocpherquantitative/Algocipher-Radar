@@ -66,7 +66,7 @@ export function SignalFeed({
             ...newSignals[randomIndex],
             confidence: Math.max(60, Math.min(95, (newSignals[randomIndex] as any).confidence + (Math.random() - 0.5) * 10)),
             timestamp: Date.now() - Math.random() * 60000,
-          };
+          } as DetectedSignal;
         }
         
         // Occasionally add new signals
