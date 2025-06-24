@@ -64,7 +64,7 @@ export function SignalFeed({
         if (newSignals[randomIndex]) {
           newSignals[randomIndex] = {
             ...newSignals[randomIndex],
-            confidence: Math.max(60, Math.min(95, newSignals[randomIndex].confidence + (Math.random() - 0.5) * 10)),
+            confidence: Math.max(60, Math.min(95, (newSignals[randomIndex] as any).confidence + (Math.random() - 0.5) * 10)),
             timestamp: Date.now() - Math.random() * 60000,
           };
         }
@@ -88,24 +88,24 @@ export function SignalFeed({
 
     if (searchTerm) {
       filtered = filtered.filter(signal =>
-        signal.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        signal.pattern.toLowerCase().includes(searchTerm.toLowerCase())
+        (signal as any).symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (signal as any).pattern.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     if (marketFilter !== 'all') {
-      filtered = filtered.filter(signal => signal.market === marketFilter);
+      filtered = filtered.filter(signal => (signal as any).market === marketFilter);
     }
 
     if (confidenceFilter !== 'all') {
       const minConfidence = confidenceFilter === 'high' ? 80 : confidenceFilter === 'medium' ? 65 : 0;
       const maxConfidence = confidenceFilter === 'high' ? 100 : confidenceFilter === 'medium' ? 79 : 64;
-      filtered = filtered.filter(signal => signal.confidence >= minConfidence && signal.confidence <= maxConfidence);
+      filtered = filtered.filter(signal => (signal as any).confidence >= minConfidence && (signal as any).confidence <= maxConfidence);
     }
 
     if (categoryFilter !== 'all') {
       filtered = filtered.filter(signal => {
-        const pattern = signal.patternId || '';
+        const pattern = (signal as any).patternId || '';
         switch (categoryFilter) {
           case 'price_action':
             return pattern.includes('breakout') || pattern.includes('support') || pattern.includes('gap');
@@ -124,11 +124,11 @@ export function SignalFeed({
     }
 
     if (directionFilter !== 'all') {
-      filtered = filtered.filter(signal => signal.direction === directionFilter);
+      filtered = filtered.filter(signal => (signal as any).direction === directionFilter);
     }
 
     if (timeframeFilter !== 'all') {
-      filtered = filtered.filter(signal => signal.timeframe === timeframeFilter);
+      filtered = filtered.filter(signal => (signal as any).timeframe === timeframeFilter);
     }
 
     setFilteredSignals(filtered);
@@ -139,8 +139,8 @@ export function SignalFeed({
 
     if (active.id !== over.id) {
       setFilteredSignals((items) => {
-        const oldIndex = items.findIndex(item => item.id === active.id);
-        const newIndex = items.findIndex(item => item.id === over.id);
+        const oldIndex = items.findIndex(item => (item as any).id === active.id);
+        const newIndex = items.findIndex(item => (item as any).id === over.id);
 
         return arrayMove(items, oldIndex, newIndex);
       });
@@ -160,9 +160,9 @@ export function SignalFeed({
     support_resistance: filteredSignals.filter(s => s.patternId?.includes('fib') || s.patternId?.includes('retest') || s.patternId?.includes('psychological')).length,
   };
 
-  const highConfidenceSignals = filteredSignals.filter(s => s.confidence >= 80);
+  const highConfidenceSignals = filteredSignals.filter(s => (s as any).confidence >= 80);
   const avgConfidence = filteredSignals.length > 0 ? 
-    Math.round(filteredSignals.reduce((sum, s) => sum + s.confidence, 0) / filteredSignals.length) : 0;
+    Math.round(filteredSignals.reduce((sum, s) => sum + (s as any).confidence, 0) / filteredSignals.length) : 0;
 
   // If externalSignals is provided, use it directly for rendering and skip all internal filtering logic
   const signalsToRender = externalSignals ? externalSignals : filteredSignals;
@@ -197,21 +197,21 @@ export function SignalFeed({
           collisionDetection={closestCenter}
           onDragEnd={handleDragEnd}
         >
-          <SortableContext items={signalsToRender.map(s => s.id)} strategy={verticalListSortingStrategy}>
+          <SortableContext items={signalsToRender.map(s => (s as any).id)} strategy={verticalListSortingStrategy}>
             <div className="space-y-3 pr-2">
               <AnimatePresence>
                 {signalsToRender.map((signal, index) => (
                   <motion.div
-                    key={signal.id}
+                    key={(signal as any).id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ delay: index * 0.03 }}
-                    className={selectedSignalId === signal.id ? 'ring-2 ring-primary/50 rounded-lg' : ''}
+                    className={selectedSignalId === (signal as any).id ? 'ring-2 ring-primary/50 rounded-lg' : ''}
                   >
                     <EnhancedSignalCard
                       signal={signal}
-                      onClick={() => handleSignalClick(signal.id)}
+                      onClick={() => handleSignalClick((signal as any).id)}
                     />
                   </motion.div>
                 ))}
