@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTheme } from 'next-themes';
@@ -32,7 +32,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 
-export default function SignInPage() {
+function SignInContent() {
   const [email, setEmail] = useState('demo@algocipher.com');
   const [password, setPassword] = useState('demo123');
   const [showPassword, setShowPassword] = useState(false);
@@ -198,12 +198,12 @@ export default function SignInPage() {
               <div className="text-xs text-muted-foreground">Avg Accuracy</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-500">1,247</div>
-              <div className="text-xs text-muted-foreground">Signals Today</div>
+              <div className="text-2xl font-bold text-green-500">24/7</div>
+              <div className="text-xs text-muted-foreground">Monitoring</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-500">24/7</div>
-              <div className="text-xs text-muted-foreground">Market Coverage</div>
+              <div className="text-2xl font-bold text-blue-500">50+</div>
+              <div className="text-xs text-muted-foreground">Markets</div>
             </div>
           </motion.div>
         </motion.div>
@@ -212,43 +212,17 @@ export default function SignInPage() {
         <motion.div
           initial={{ opacity: 0, x: 50 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="w-full max-w-md mx-auto"
+          transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+          className="w-full"
         >
           <Card className="glassmorphism shadow-2xl border-border/50">
-            <CardHeader className="space-y-4 text-center">
-              {/* Mobile Logo */}
-              <div className="lg:hidden">
-                <div className="relative w-32 h-8 mx-auto mb-2">
-                  {theme === 'dark' ? (
-                    <Image
-                      src="/Light with wordmark.svg"
-                      alt="Algocipher Radar"
-                      fill
-                      className="object-contain"
-                      priority
-                    />
-                  ) : (
-                    <Image
-                      src="/Dark with wordmark.svg"
-                      alt="Algocipher Radar"
-                      fill
-                      className="object-contain"
-                      priority
-                    />
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <CardTitle className="text-2xl font-bold text-foreground">
-                  Welcome Back
-                </CardTitle>
-                <CardDescription className="text-muted-foreground">
-                  Sign in to access your trading dashboard
-                </CardDescription>
-              </div>
-
+            <CardHeader className="space-y-1">
+              <CardTitle className="text-2xl font-bold text-center">Welcome Back</CardTitle>
+              <CardDescription className="text-center">
+                Sign in to your Algocipher Radar account
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
               {/* Success Message */}
               {successMessage && (
                 <Alert className="border-green-500/50 bg-green-500/10">
@@ -259,123 +233,99 @@ export default function SignInPage() {
                 </Alert>
               )}
 
-              {/* Demo Credentials */}
-              <div className="bg-muted/30 rounded-lg p-3 text-left">
-                <div className="flex items-center space-x-2 mb-2">
-                  <Sparkles className="w-4 h-4 text-primary" />
-                  <span className="text-sm font-medium text-foreground">Demo Account</span>
-                </div>
-                <div className="text-xs text-muted-foreground space-y-1">
-                  <div>Email: demo@algocipher.com</div>
-                  <div>Password: demo123</div>
-                </div>
-              </div>
-            </CardHeader>
-
-            <CardContent className="space-y-6">
-              {/* Error Alert */}
+              {/* Error Message */}
               {error && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                >
-                  <Alert variant="destructive">
-                    <AlertCircle className="h-4 w-4" />
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                </motion.div>
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
               )}
 
-              {/* Social Login */}
-              <div className="space-y-3">
+              {/* OAuth Buttons */}
+              <div className="grid grid-cols-1 gap-3">
                 <Button
-                  onClick={signInWithGoogle}
                   variant="outline"
-                  className="w-full bg-muted/30 hover:bg-muted/50 border-border/50"
+                  onClick={signInWithGoogle}
+                  className="w-full"
                   disabled={isLoading}
                 >
                   <Chrome className="w-4 h-4 mr-2" />
                   Continue with Google
                 </Button>
-                
-                <div className="grid grid-cols-2 gap-3">
-                  <Button
-                    variant="outline"
-                    onClick={signInWithGitHub}
-                    className="bg-muted/30 hover:bg-muted/50 border-border/50"
-                    disabled={isLoading}
-                  >
-                    <Github className="w-4 h-4 mr-2" />
-                    GitHub
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={signInWithApple}
-                    className="bg-muted/30 hover:bg-muted/50 border-border/50"
-                    disabled={isLoading}
-                  >
-                    <Apple className="w-4 h-4 mr-2" />
-                    Apple
-                  </Button>
-                </div>
+                <Button
+                  variant="outline"
+                  onClick={signInWithGitHub}
+                  className="w-full"
+                  disabled={isLoading}
+                >
+                  <Github className="w-4 h-4 mr-2" />
+                  Continue with GitHub
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={signInWithApple}
+                  className="w-full"
+                  disabled={isLoading}
+                >
+                  <Apple className="w-4 h-4 mr-2" />
+                  Continue with Apple
+                </Button>
               </div>
 
-              {/* Divider */}
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <Separator className="w-full" />
+                  <span className="w-full border-t border-border/50" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">Or continue with email</span>
+                  <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
                 </div>
               </div>
 
-              {/* Sign In Form */}
+              {/* Email/Password Form */}
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm font-medium">
-                    Email Address
-                  </Label>
+                  <Label htmlFor="email">Email</Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="email"
                       type="email"
                       placeholder="Enter your email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10 bg-muted/50 border-border/50 focus:bg-muted/70"
+                      className="pl-10"
                       required
+                      disabled={isLoading}
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="password" className="text-sm font-medium">
-                    Password
-                  </Label>
+                  <Label htmlFor="password">Password</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
                       id="password"
-                      type={showPassword ? 'text' : 'password'}
+                      type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10 pr-10 bg-muted/50 border-border/50 focus:bg-muted/70"
+                      className="pl-10 pr-10"
                       required
+                      disabled={isLoading}
                     />
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                       onClick={() => setShowPassword(!showPassword)}
+                      disabled={isLoading}
                     >
                       {showPassword ? (
-                        <EyeOff className="w-4 h-4" />
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
                       ) : (
-                        <Eye className="w-4 h-4" />
+                        <Eye className="h-4 w-4 text-muted-foreground" />
                       )}
                     </Button>
                   </div>
@@ -387,60 +337,58 @@ export default function SignInPage() {
                       id="remember"
                       checked={rememberMe}
                       onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                      disabled={isLoading}
                     />
-                    <Label htmlFor="remember" className="text-sm text-muted-foreground">
-                      Remember me
-                    </Label>
+                    <Label htmlFor="remember" className="text-sm">Remember me</Label>
                   </div>
-                  <Button variant="link" className="text-sm p-0 h-auto">
+                  <Link
+                    href="/auth/forgot-password"
+                    className="text-sm text-primary hover:underline"
+                  >
                     Forgot password?
-                  </Button>
+                  </Link>
                 </div>
 
-                <Button
-                  type="submit"
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
-                  disabled={isLoading}
-                >
+                <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? (
-                    <div className="flex items-center space-x-2">
-                      <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                      <span>Signing in...</span>
-                    </div>
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                      Signing in...
+                    </>
                   ) : (
-                    <div className="flex items-center space-x-2">
-                      <span>Sign In</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </div>
+                    <>
+                      Sign In
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </>
                   )}
                 </Button>
               </form>
 
-              {/* Sign Up Link */}
-              <div className="text-center text-sm text-muted-foreground">
-                Don't have an account?{' '}
-                <Link href="/auth/signup" className="text-primary hover:underline font-medium">
-                  Sign up for free
+              <div className="text-center text-sm">
+                <span className="text-muted-foreground">Don't have an account? </span>
+                <Link href="/auth/signup" className="text-primary hover:underline">
+                  Sign up
                 </Link>
               </div>
             </CardContent>
           </Card>
-
-          {/* Footer */}
-          <div className="mt-8 text-center text-xs text-muted-foreground">
-            <p>
-              By signing in, you agree to our{' '}
-              <Button variant="link" className="p-0 h-auto text-xs">
-                Terms of Service
-              </Button>{' '}
-              and{' '}
-              <Button variant="link" className="p-0 h-auto text-xs">
-                Privacy Policy
-              </Button>
-            </p>
-          </div>
         </motion.div>
       </div>
     </div>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex items-center justify-center p-4">
+        <div className="text-center space-y-4">
+          <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin mx-auto" />
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    }>
+      <SignInContent />
+    </Suspense>
   );
 }

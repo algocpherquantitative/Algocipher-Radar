@@ -49,6 +49,11 @@ export default function DashboardPage() {
 
   useEffect(() => {
     setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    
     // Check authentication
     const checkAuth = () => {
       const token = localStorage.getItem('auth-token');
@@ -65,7 +70,7 @@ export default function DashboardPage() {
     };
 
     checkAuth();
-  }, [router]);
+  }, [router, mounted]);
 
   useEffect(() => {
     // Simulate real-time signal updates (copy from SignalFeed)
