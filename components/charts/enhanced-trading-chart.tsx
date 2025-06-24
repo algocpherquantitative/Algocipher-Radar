@@ -48,7 +48,7 @@ export function EnhancedTradingChart({ selectedSignal }: EnhancedTradingChartPro
         setChartData(generateChartData());
         
         // Mock selected signal data - in real app this would come from API
-        const mockSignalData: DetectedSignal = {
+        const mockSignalData = {
           id: selectedSignal,
           symbol: 'EUR/USD',
           market: 'forex',
@@ -90,7 +90,7 @@ export function EnhancedTradingChart({ selectedSignal }: EnhancedTradingChartPro
             { price: 1.0820, type: 'stop_loss', strength: 'strong' }
           ],
           volume: 'high'
-        };
+        } as DetectedSignal;
         
         setSelectedSignalData(mockSignalData);
         setIsLoading(false);
@@ -151,33 +151,33 @@ export function EnhancedTradingChart({ selectedSignal }: EnhancedTradingChartPro
         <div className="flex items-center space-x-3">
           <div>
             <h2 className="text-xl font-bold text-foreground">
-              {selectedSignalData?.symbol || 'EUR/USD'}
+              {(selectedSignalData as any)?.symbol || 'EUR/USD'}
             </h2>
             <p className="text-sm text-muted-foreground">
-              {selectedSignalData?.pattern || 'Loading pattern...'}
+              {(selectedSignalData as any)?.pattern || 'Loading pattern...'}
             </p>
           </div>
           
           {selectedSignalData && (
             <>
               <Badge variant="outline" className={`${
-                selectedSignalData.direction === 'bullish' ? 'text-green-400 border-green-400/30' :
-                selectedSignalData.direction === 'bearish' ? 'text-red-400 border-red-400/30' :
+                (selectedSignalData as any).direction === 'bullish' ? 'text-green-400 border-green-400/30' :
+                (selectedSignalData as any).direction === 'bearish' ? 'text-red-400 border-red-400/30' :
                 'text-blue-400 border-blue-400/30'
               }`}>
-                {selectedSignalData.direction === 'bullish' ? <TrendingUp className="w-3 h-3 mr-1" /> : 
-                 selectedSignalData.direction === 'bearish' ? <TrendingDown className="w-3 h-3 mr-1" /> : 
+                {(selectedSignalData as any).direction === 'bullish' ? <TrendingUp className="w-3 h-3 mr-1" /> : 
+                 (selectedSignalData as any).direction === 'bearish' ? <TrendingDown className="w-3 h-3 mr-1" /> : 
                  <Activity className="w-3 h-3 mr-1" />}
-                {selectedSignalData.direction}
+                {(selectedSignalData as any).direction}
               </Badge>
               
               <Badge variant="outline" className="text-blue-400 border-blue-400/30">
-                {selectedSignalData.confidence}% Confidence
+                {(selectedSignalData as any).confidence}% Confidence
               </Badge>
               
               <Badge variant="outline" className="text-purple-400 border-purple-400/30">
                 <Star className="w-3 h-3 mr-1" />
-                {selectedSignalData.winRate}% Win Rate
+                {(selectedSignalData as any).winRate}% Win Rate
               </Badge>
             </>
           )}
@@ -277,22 +277,22 @@ export function EnhancedTradingChart({ selectedSignal }: EnhancedTradingChartPro
                       {showLevels && selectedSignalData && (
                         <>
                           <ReferenceLine 
-                            y={parseFloat(selectedSignalData.entry)} 
+                            y={parseFloat((selectedSignalData as any).entry)} 
                             stroke="#10b981" 
                             strokeDasharray="5 5" 
-                            label={{ value: "Entry", position: "topRight" }}
+                            label={{ value: "Entry", position: "insideTopRight" }}
                           />
                           <ReferenceLine 
-                            y={parseFloat(selectedSignalData.takeProfit)} 
+                            y={parseFloat((selectedSignalData as any).takeProfit)} 
                             stroke="#22c55e" 
                             strokeDasharray="5 5" 
-                            label={{ value: "Take Profit", position: "topRight" }}
+                            label={{ value: "Take Profit", position: "insideTopRight" }}
                           />
                           <ReferenceLine 
-                            y={parseFloat(selectedSignalData.stopLoss)} 
+                            y={parseFloat((selectedSignalData as any).stopLoss)} 
                             stroke="#ef4444" 
                             strokeDasharray="5 5" 
-                            label={{ value: "Stop Loss", position: "topRight" }}
+                            label={{ value: "Stop Loss", position: "insideTopRight" }}
                           />
                         </>
                       )}
@@ -305,15 +305,15 @@ export function EnhancedTradingChart({ selectedSignal }: EnhancedTradingChartPro
                       <div className="flex items-center space-x-4 text-sm bg-card/80 backdrop-blur-sm rounded p-2">
                         <div className="flex items-center space-x-2">
                           <div className="w-3 h-3 bg-green-500 rounded-full" />
-                          <span className="text-muted-foreground">Entry: {selectedSignalData.entry}</span>
+                          <span className="text-muted-foreground">Entry: {(selectedSignalData as any).entry}</span>
                         </div>
                         <div className="flex items-center space-x-2">
                           <div className="w-3 h-3 bg-green-400 rounded-full" />
-                          <span className="text-muted-foreground">TP: {selectedSignalData.takeProfit}</span>
+                          <span className="text-muted-foreground">TP: {(selectedSignalData as any).takeProfit}</span>
                         </div>
                         <div className="flex items-center space-x-2">
                           <div className="w-3 h-3 bg-red-500 rounded-full" />
-                          <span className="text-muted-foreground">SL: {selectedSignalData.stopLoss}</span>
+                          <span className="text-muted-foreground">SL: {(selectedSignalData as any).stopLoss}</span>
                         </div>
                       </div>
                     </div>
@@ -336,23 +336,23 @@ export function EnhancedTradingChart({ selectedSignal }: EnhancedTradingChartPro
                       <div className="grid grid-cols-2 gap-3 text-sm">
                         <div>
                           <span className="text-muted-foreground">Pattern:</span>
-                          <p className="font-medium">{selectedSignalData.pattern}</p>
+                          <p className="font-medium">{(selectedSignalData as any).pattern}</p>
                         </div>
                         <div>
                           <span className="text-muted-foreground">Timeframe:</span>
-                          <p className="font-medium">{selectedSignalData.timeframe}</p>
+                          <p className="font-medium">{(selectedSignalData as any).timeframe}</p>
                         </div>
                         <div>
                           <span className="text-muted-foreground">Risk/Reward:</span>
-                          <p className="font-medium text-green-400">1:{selectedSignalData.riskReward}</p>
+                          <p className="font-medium text-green-400">1:{(selectedSignalData as any).riskReward}</p>
                         </div>
                         <div>
                           <span className="text-muted-foreground">Volume:</span>
-                          <p className="font-medium capitalize">{selectedSignalData.volume}</p>
+                          <p className="font-medium capitalize">{(selectedSignalData as any).volume}</p>
                         </div>
                         <div>
                           <span className="text-muted-foreground">Win Rate:</span>
-                          <p className="font-medium text-blue-400">{selectedSignalData.winRate}%</p>
+                          <p className="font-medium text-blue-400">{(selectedSignalData as any).winRate}%</p>
                         </div>
                         <div>
                           <span className="text-muted-foreground">Category:</span>
@@ -387,7 +387,7 @@ export function EnhancedTradingChart({ selectedSignal }: EnhancedTradingChartPro
                       <div className="flex justify-between text-sm">
                         <span className="text-muted-foreground">Confidence Level</span>
                         <span className="text-green-400 font-medium">
-                          {selectedSignalData?.confidence}%
+                          {(selectedSignalData as any).confidence}%
                         </span>
                       </div>
                     </div>
@@ -401,7 +401,7 @@ export function EnhancedTradingChart({ selectedSignal }: EnhancedTradingChartPro
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    {selectedSignalData?.explanation || 'Loading analysis...'}
+                    {(selectedSignalData as any)?.explanation || 'Loading analysis...'}
                   </p>
                 </CardContent>
               </Card>

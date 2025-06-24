@@ -269,7 +269,7 @@ export function TradingPreferences({ user }: TradingPreferencesProps) {
                       } else {
                         setSignalFilters(prev => ({
                           ...prev,
-                          preferredMarkets: prev.preferredMarkets.filter(m => m !== market.id)
+                          preferredMarkets: prev.preferredMarkets.filter((m: string) => m !== market.id)
                         }));
                       }
                     }}
@@ -299,7 +299,7 @@ export function TradingPreferences({ user }: TradingPreferencesProps) {
                       } else {
                         setSignalFilters(prev => ({
                           ...prev,
-                          preferredTimeframes: prev.preferredTimeframes.filter(t => t !== timeframe.id)
+                          preferredTimeframes: prev.preferredTimeframes.filter((t: string) => t !== timeframe.id)
                         }));
                       }
                     }}
@@ -329,7 +329,7 @@ export function TradingPreferences({ user }: TradingPreferencesProps) {
                       } else {
                         setSignalFilters(prev => ({
                           ...prev,
-                          patternTypes: prev.patternTypes.filter(p => p !== category.id)
+                          patternTypes: prev.patternTypes.filter((p: string) => p !== category.id)
                         }));
                       }
                     }}
@@ -423,7 +423,7 @@ export function TradingPreferences({ user }: TradingPreferencesProps) {
                         } else {
                           setTradingStyle(prev => ({
                             ...prev,
-                            sessionTimes: prev.sessionTimes.filter(s => s !== session.id)
+                            sessionTimes: prev.sessionTimes.filter((s: string) => s !== session.id)
                           }));
                         }
                       }}

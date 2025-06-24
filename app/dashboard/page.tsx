@@ -18,6 +18,7 @@ import Image from 'next/image';
 import { CollapsibleFilterColumn } from '@/components/signals/collapsible-filter-column';
 import { generateMockSignals } from '@/lib/mock-data';
 import { Badge } from '@/components/ui/badge';
+import type { DetectedSignal } from '@/lib/signal-types';
 
 export default function DashboardPage() {
   const [selectedSignal, setSelectedSignal] = useState<string | null>(null);
@@ -37,7 +38,7 @@ export default function DashboardPage() {
   const [categoryFilter, setCategoryFilter] = useState('all');
 
   // Signals state for the signals tab
-  const [signals, setSignals] = useState(generateMockSignals());
+  const [signals, setSignals] = useState<DetectedSignal[]>(generateMockSignals());
 
   // Mock recent signals for command palette
   const recentSignals = [
@@ -69,16 +70,17 @@ export default function DashboardPage() {
   useEffect(() => {
     // Simulate real-time signal updates (copy from SignalFeed)
     const interval = setInterval(() => {
-      setSignals(prev => {
+      setSignals((prev: DetectedSignal[]) => {
         const newSignals = [...prev];
         // Randomly update some signals
         const randomIndex = Math.floor(Math.random() * newSignals.length);
         if (newSignals[randomIndex]) {
+          const original = newSignals[randomIndex];
           newSignals[randomIndex] = {
-            ...newSignals[randomIndex],
-            confidence: Math.max(60, Math.min(95, newSignals[randomIndex].confidence + (Math.random() - 0.5) * 10)),
+            ...original,
+            confidence: Math.max(60, Math.min(95, (original as any).confidence + (Math.random() - 0.5) * 10)),
             timestamp: Date.now() - Math.random() * 60000,
-          };
+          } as DetectedSignal;
         }
         // Occasionally add new signals
         if (Math.random() < 0.3) {
@@ -95,17 +97,17 @@ export default function DashboardPage() {
   // Filtering logic for signals tab
   const filteredSignals = signals.filter(signal => {
     if (searchTerm && !(
-      signal.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      signal.pattern.toLowerCase().includes(searchTerm.toLowerCase())
+      (signal as any).symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ((signal as any).patternId && (signal as any).patternId.toLowerCase().includes(searchTerm.toLowerCase()))
     )) return false;
-    if (marketFilter !== 'all' && signal.market !== marketFilter) return false;
+    if (marketFilter !== 'all' && (signal as any).market !== marketFilter) return false;
     if (confidenceFilter !== 'all') {
       const minConfidence = confidenceFilter === 'high' ? 80 : confidenceFilter === 'medium' ? 65 : 0;
       const maxConfidence = confidenceFilter === 'high' ? 100 : confidenceFilter === 'medium' ? 79 : 64;
-      if (signal.confidence < minConfidence || signal.confidence > maxConfidence) return false;
+      if ((signal as any).confidence < minConfidence || (signal as any).confidence > maxConfidence) return false;
     }
     if (categoryFilter !== 'all') {
-      const pattern = signal.patternId || '';
+      const pattern = (signal as any).patternId || '';
       switch (categoryFilter) {
         case 'price_action':
           if (!(pattern.includes('breakout') || pattern.includes('support') || pattern.includes('gap'))) return false;
@@ -126,13 +128,13 @@ export default function DashboardPage() {
           break;
       }
     }
-    if (directionFilter !== 'all' && signal.direction !== directionFilter) return false;
-    if (timeframeFilter !== 'all' && signal.timeframe !== timeframeFilter) return false;
+    if (directionFilter !== 'all' && (signal as any).direction !== directionFilter) return false;
+    if (timeframeFilter !== 'all' && (signal as any).timeframe !== timeframeFilter) return false;
     return true;
   });
 
-  const avgConfidence = filteredSignals.length > 0 ? Math.round(filteredSignals.reduce((sum, s) => sum + s.confidence, 0) / filteredSignals.length) : 0;
-  const highConfidenceCount = filteredSignals.filter(s => s.confidence >= 80).length;
+  const avgConfidence = filteredSignals.length > 0 ? Math.round(filteredSignals.reduce((sum, s) => sum + (s as any).confidence, 0) / filteredSignals.length) : 0;
+  const highConfidenceCount = filteredSignals.filter(s => (s as any).confidence >= 80).length;
 
   const handleSignalAction = (action: string, signalId?: string) => {
     console.log(`Signal action: ${action}`, signalId);
@@ -258,45 +260,45 @@ export default function DashboardPage() {
               {/* Filter and Signals Panel Group */}
               <ResizablePanel defaultSize={isFilterCollapsed ? 8 : 50} minSize={8}>
                 <div className="h-full flex">
-                  <CollapsibleFilterColumn
-                    searchTerm={searchTerm}
-                    setSearchTerm={setSearchTerm}
-                    marketFilter={marketFilter}
-                    setMarketFilter={setMarketFilter}
-                    confidenceFilter={confidenceFilter}
-                    setConfidenceFilter={setConfidenceFilter}
-                    directionFilter={directionFilter}
-                    setDirectionFilter={setDirectionFilter}
-                    timeframeFilter={timeframeFilter}
-                    setTimeframeFilter={setTimeframeFilter}
-                    categoryFilter={categoryFilter}
-                    setCategoryFilter={setCategoryFilter}
-                    onCollapseChange={handleFilterCollapse}
-                  />
+                    <CollapsibleFilterColumn
+                      searchTerm={searchTerm}
+                      setSearchTerm={setSearchTerm}
+                      marketFilter={marketFilter}
+                      setMarketFilter={setMarketFilter}
+                      confidenceFilter={confidenceFilter}
+                      setConfidenceFilter={setConfidenceFilter}
+                      directionFilter={directionFilter}
+                      setDirectionFilter={setDirectionFilter}
+                      timeframeFilter={timeframeFilter}
+                      setTimeframeFilter={setTimeframeFilter}
+                      categoryFilter={categoryFilter}
+                      setCategoryFilter={setCategoryFilter}
+                      onCollapseChange={handleFilterCollapse}
+                    />
                   {/* Signals Panel */}
                   <div className="flex-1 h-full p-4 flex flex-col">
-                    <div className="mb-3 flex-shrink-0">
-                      <h2 className="text-lg font-semibold text-foreground flex items-center">
-                        <Zap className="w-5 h-5 mr-2 text-primary" />
-                        Live Trading Signals
-                      </h2>
-                      <p className="text-sm text-muted-foreground">
-                        AI-detected patterns with confidence scoring
-                      </p>
+                      <div className="mb-3 flex-shrink-0">
+                        <h2 className="text-lg font-semibold text-foreground flex items-center">
+                          <Zap className="w-5 h-5 mr-2 text-primary" />
+                          Live Trading Signals
+                        </h2>
+                        <p className="text-sm text-muted-foreground">
+                          AI-detected patterns with confidence scoring
+                        </p>
+                      </div>
+                      <div className="flex-1 min-h-0">
+                        <SignalFeed
+                          onSignalSelect={setSelectedSignal}
+                          hideFilters
+                          searchTerm={searchTerm}
+                          marketFilter={marketFilter}
+                          confidenceFilter={confidenceFilter}
+                          directionFilter={directionFilter}
+                          timeframeFilter={timeframeFilter}
+                          categoryFilter={categoryFilter}
+                        />
+                      </div>
                     </div>
-                    <div className="flex-1 min-h-0">
-                      <SignalFeed
-                        onSignalSelect={setSelectedSignal}
-                        hideFilters
-                        searchTerm={searchTerm}
-                        marketFilter={marketFilter}
-                        confidenceFilter={confidenceFilter}
-                        directionFilter={directionFilter}
-                        timeframeFilter={timeframeFilter}
-                        categoryFilter={categoryFilter}
-                      />
-                    </div>
-                  </div>
                 </div>
               </ResizablePanel>
               <ResizableHandle withHandle />
@@ -345,36 +347,36 @@ export default function DashboardPage() {
               {/* Filter and Signals Panel Group */}
               <ResizablePanel defaultSize={isFilterCollapsed ? 8 : 50} minSize={8}>
                 <div className="h-full flex">
-                  <CollapsibleFilterColumn
-                    searchTerm={searchTerm}
-                    setSearchTerm={setSearchTerm}
-                    marketFilter={marketFilter}
-                    setMarketFilter={setMarketFilter}
-                    confidenceFilter={confidenceFilter}
-                    setConfidenceFilter={setConfidenceFilter}
-                    directionFilter={directionFilter}
-                    setDirectionFilter={setDirectionFilter}
-                    timeframeFilter={timeframeFilter}
-                    setTimeframeFilter={setTimeframeFilter}
-                    categoryFilter={categoryFilter}
-                    setCategoryFilter={setCategoryFilter}
+                <CollapsibleFilterColumn
+                  searchTerm={searchTerm}
+                  setSearchTerm={setSearchTerm}
+                  marketFilter={marketFilter}
+                  setMarketFilter={setMarketFilter}
+                  confidenceFilter={confidenceFilter}
+                  setConfidenceFilter={setConfidenceFilter}
+                  directionFilter={directionFilter}
+                  setDirectionFilter={setDirectionFilter}
+                  timeframeFilter={timeframeFilter}
+                  setTimeframeFilter={setTimeframeFilter}
+                  categoryFilter={categoryFilter}
+                  setCategoryFilter={setCategoryFilter}
                     onCollapseChange={handleFilterCollapse}
-                  />
-                  {/* Signals Panel */}
+                />
+              {/* Signals Panel */}
                   <div className="flex-1 h-full p-4 flex flex-col">
                     {/* Remove the header from here */}
-                    <div className="flex-1 min-h-0">
-                      <SignalFeed
-                        onSignalSelect={setSelectedSignal}
-                        hideFilters
-                        searchTerm={searchTerm}
-                        marketFilter={marketFilter}
-                        confidenceFilter={confidenceFilter}
-                        directionFilter={directionFilter}
-                        timeframeFilter={timeframeFilter}
-                        categoryFilter={categoryFilter}
+                  <div className="flex-1 min-h-0">
+                    <SignalFeed
+                      onSignalSelect={setSelectedSignal}
+                      hideFilters
+                      searchTerm={searchTerm}
+                      marketFilter={marketFilter}
+                      confidenceFilter={confidenceFilter}
+                      directionFilter={directionFilter}
+                      timeframeFilter={timeframeFilter}
+                      categoryFilter={categoryFilter}
                         signals={filteredSignals}
-                      />
+                    />
                     </div>
                   </div>
                 </div>

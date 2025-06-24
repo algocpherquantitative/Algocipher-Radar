@@ -131,7 +131,7 @@ export function NotificationCenter() {
   const [isOpen, setIsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settings, setSettings] = useState(null);
-  const resetToDefaultsRef = useRef<() => void>();
+  const resetToDefaultsRef = useRef<(() => void) | null>(null);
 
   // Simulate real-time notifications
   useEffect(() => {

@@ -171,20 +171,20 @@ export function SignalFeed({
     <div className="flex flex-col h-full space-y-4">
       {/* Signal Stats Header */}
       {!externalSignals && (
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <Badge variant="outline" className="text-green-400 border-green-400/30">
-              <TrendingUp className="w-3 h-3 mr-1" />
-              {filteredSignals.length} Signals
-            </Badge>
-            <Badge variant="outline" className="text-blue-400 border-blue-400/30">
-              {avgConfidence}% Avg Confidence
-            </Badge>
-            <Badge variant="outline" className="text-yellow-400 border-yellow-400/30">
-              {highConfidenceSignals.length} High Confidence
-            </Badge>
-          </div>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-3">
+          <Badge variant="outline" className="text-green-400 border-green-400/30">
+            <TrendingUp className="w-3 h-3 mr-1" />
+            {filteredSignals.length} Signals
+          </Badge>
+          <Badge variant="outline" className="text-blue-400 border-blue-400/30">
+            {avgConfidence}% Avg Confidence
+          </Badge>
+          <Badge variant="outline" className="text-yellow-400 border-yellow-400/30">
+            {highConfidenceSignals.length} High Confidence
+          </Badge>
         </div>
+      </div>
       )}
 
       {/* Enhanced Filters */}
