@@ -27,12 +27,12 @@ export default function HomePage() {
           router.replace('/dashboard');
         } else {
           setIsAuthenticated(false);
-          router.replace('/auth/signin');
+          // Don't redirect to signin - let them see the landing page
         }
       } catch (error) {
         console.error('Error checking authentication:', error);
         setIsAuthenticated(false);
-        router.replace('/auth/signin');
+        // Don't redirect to signin - let them see the landing page
       }
     };
 
@@ -51,11 +51,6 @@ export default function HomePage() {
     );
   }
 
-  // Show landing page for unauthenticated users
-  if (!isAuthenticated) {
-    return <LandingPage />;
-  }
-
-  // This shouldn't be reached due to the redirect above, but just in case
-  return null;
+  // Show landing page for all users (authenticated users will be redirected to dashboard above)
+  return <LandingPage />;
 }
